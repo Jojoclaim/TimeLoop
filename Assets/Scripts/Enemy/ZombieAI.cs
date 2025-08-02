@@ -5,7 +5,7 @@ using System.Linq;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(CircleCollider2D))]
-public class AdvancedZombieAI : MonoBehaviour, IDamageable
+public class ZombieAI : MonoBehaviour, IDamageable
 {
     [Header("Current State")]
     [SerializeField] private ZombieType zombieType;
@@ -26,9 +26,9 @@ public class AdvancedZombieAI : MonoBehaviour, IDamageable
     private Rigidbody2D playerRigidbody;
 
     // Group coordination
-    private List<AdvancedZombieAI> squadMembers = new List<AdvancedZombieAI>();
-    private AdvancedZombieAI squadLeader;
-    private Dictionary<AdvancedZombieAI, float> lastCommunicationTime = new Dictionary<AdvancedZombieAI, float>();
+    private List<ZombieAI> squadMembers = new List<ZombieAI>();
+    private ZombieAI squadLeader;
+    private Dictionary<ZombieAI, float> lastCommunicationTime = new Dictionary<ZombieAI, float>();
 
     // Tactical information
     private Vector3 lastPlayerPosition;
@@ -370,7 +370,7 @@ public class AdvancedZombieAI : MonoBehaviour, IDamageable
 
     private void AssignTacticalRoles(float avgDistance, int withLOS)
     {
-        List<AdvancedZombieAI> unassigned = new List<AdvancedZombieAI>(squadMembers);
+        List<ZombieAI> unassigned = new List<ZombieAI>(squadMembers);
 
         // Ensure we have chasers if player is visible
         int chasersNeeded = Mathf.Min(2, withLOS);
@@ -395,7 +395,7 @@ public class AdvancedZombieAI : MonoBehaviour, IDamageable
         }
     }
 
-    private void AssignRoleToClosest(List<AdvancedZombieAI> available, TacticalRole role, int count)
+    private void AssignRoleToClosest(List<ZombieAI> available, TacticalRole role, int count)
     {
         var sorted = available.OrderBy(z => Vector3.Distance(z.transform.position, playerTransform.position)).ToList();
 
@@ -406,7 +406,7 @@ public class AdvancedZombieAI : MonoBehaviour, IDamageable
         }
     }
 
-    private void AssignRoleToFastest(List<AdvancedZombieAI> available, TacticalRole role, int count)
+    private void AssignRoleToFastest(List<ZombieAI> available, TacticalRole role, int count)
     {
         var sorted = available.OrderByDescending(z => z.zombieType.moveSpeed).ToList();
 
@@ -509,7 +509,7 @@ public class AdvancedZombieAI : MonoBehaviour, IDamageable
         }
     }
 
-    public void JoinSquad(AdvancedZombieAI leader)
+    public void JoinSquad(ZombieAI leader)
     {
         if (squadLeader != null && squadLeader != leader)
         {
@@ -525,7 +525,7 @@ public class AdvancedZombieAI : MonoBehaviour, IDamageable
         UpdateCachedValues();
     }
 
-    public void CommunicateWith(AdvancedZombieAI other)
+    public void CommunicateWith(ZombieAI other)
     {
         if (Vector3.Distance(transform.position, other.transform.position) > zombieType.communicationRange)
             return;
@@ -585,7 +585,7 @@ public class AdvancedZombieAI : MonoBehaviour, IDamageable
 
         foreach (var collider in nearbyColliders)
         {
-            AdvancedZombieAI zombie = collider.GetComponent<AdvancedZombieAI>();
+            ZombieAI zombie = collider.GetComponent<ZombieAI>();
             if (zombie != null && zombie != this)
             {
                 zombie.lastPlayerPosition = threatPosition;
@@ -602,7 +602,7 @@ public class AdvancedZombieAI : MonoBehaviour, IDamageable
         if (isLeader && squadMembers.Count > 0)
         {
             // Pass leadership to another zombie
-            AdvancedZombieAI newLeader = squadMembers.FirstOrDefault(z => z.zombieType.canBeLeader);
+            ZombieAI newLeader = squadMembers.FirstOrDefault(z => z.zombieType.canBeLeader);
             if (newLeader != null)
             {
                 newLeader.BecomeLeader();
