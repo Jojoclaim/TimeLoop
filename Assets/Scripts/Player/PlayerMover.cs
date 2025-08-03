@@ -1,241 +1,9 @@
-/*using UnityEngine;
-using System.Collections;
-
-[RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(SpriteRenderer))]
-public class PlayerMover : MonoBehaviour
-{
-    [Header("Movement")]
-    [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float movementSmoothing = 0.05f; // Lower = smoother
-    [SerializeField] private float cellsPerUnit = 16f;
-
-    [Header("Grid Snapping")]
-    [SerializeField] private float snapSpeed = 20f;
-    [SerializeField] private float snapDelay = 0.05f;
-    [SerializeField] private float snapDistanceThreshold = 0.3f; // In cells
-
-    [Header("Sprite")]
-    [SerializeField] private bool flipSprite = true;
-
-    [Header("Refs")]
-    [SerializeField] private Rigidbody2D rb;
-    [SerializeField] private SpriteRenderer spriteRenderer;
-
-    // Cached values for performance
-    private Vector2 movement;
-    private Vector2 smoothedMovement;
-    private Vector2 velocity;
-    private float cellSize;
-    private float snapDistanceSquared;
-    private float timeSinceLastInput;
-    private bool isSnapping;
-    private Coroutine snapCoroutine;
-
-    // Constants for optimization
-    private const float INPUT_THRESHOLD = 0.01f;
-    private const float INPUT_THRESHOLD_SQUARED = INPUT_THRESHOLD * INPUT_THRESHOLD;
-    private const float DIAGONAL_FACTOR = 0.7071f; // 1/sqrt(2) for proper diagonal speed
-
-    private void Awake()
-    {
-        rb ??= GetComponent<Rigidbody2D>();
-        spriteRenderer ??= GetComponent<SpriteRenderer>();
-
-        // Configure Rigidbody2D
-        rb.gravityScale = 0f;
-        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-        rb.interpolation = RigidbodyInterpolation2D.Interpolate;
-
-        // Pre-calculate constants
-        cellSize = 1f / cellsPerUnit;
-        snapDistanceSquared = (snapDistanceThreshold * cellSize) * (snapDistanceThreshold * cellSize);
-    }
-
-    private void Update()
-    {
-        // Get raw input
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
-
-        // Quick check for any input
-        if (h != 0f || v != 0f)
-        {
-            movement.x = h;
-            movement.y = v;
-
-            // Proper diagonal normalization
-            if (h != 0f && v != 0f)
-            {
-                movement *= DIAGONAL_FACTOR;
-            }
-
-            timeSinceLastInput = 0f;
-
-            // Cancel snapping
-            if (isSnapping)
-            {
-                if (snapCoroutine != null)
-                {
-                    StopCoroutine(snapCoroutine);
-                    snapCoroutine = null;
-                }
-                isSnapping = false;
-            }
-
-            // Sprite flipping
-            if (flipSprite && h != 0f)
-            {
-                spriteRenderer.flipX = h < 0f;
-            }
-        }
-        else
-        {
-            movement = Vector2.zero;
-            timeSinceLastInput += Time.deltaTime;
-
-            // Check for snapping
-            if (timeSinceLastInput >= snapDelay && !isSnapping && snapCoroutine == null)
-            {
-                CheckAndStartSnap();
-            }
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        if (!isSnapping)
-        {
-            // Smooth movement interpolation
-            smoothedMovement = Vector2.Lerp(smoothedMovement, movement, 1f - movementSmoothing);
-            velocity = smoothedMovement * moveSpeed;
-            rb.linearVelocity = velocity;
-        }
-    }
-
-    private void CheckAndStartSnap()
-    {
-        // Quick distance check using squared distance (no sqrt)
-        Vector2 pos = rb.position;
-        float nearestX = Mathf.Round(pos.x / cellSize) * cellSize;
-        float nearestY = Mathf.Round(pos.y / cellSize) * cellSize;
-
-        float dx = pos.x - nearestX;
-        float dy = pos.y - nearestY;
-        float distSq = dx * dx + dy * dy;
-
-        if (distSq <= snapDistanceSquared && distSq > 0.0001f)
-        {
-            snapCoroutine = StartCoroutine(SnapToGrid(new Vector2(nearestX, nearestY)));
-        }
-    }
-
-    private IEnumerator SnapToGrid(Vector2 targetPos)
-    {
-        isSnapping = true;
-
-        Vector2 startPos = rb.position;
-        Vector2 difference = targetPos - startPos;
-        float distance = difference.magnitude;
-
-        // Pre-calculate animation duration based on distance
-        float duration = distance / (snapSpeed * cellSize);
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            // Check for input interruption
-            if (movement.sqrMagnitude > INPUT_THRESHOLD_SQUARED)
-            {
-                isSnapping = false;
-                snapCoroutine = null;
-                yield break;
-            }
-
-            elapsed += Time.fixedDeltaTime;
-            float t = Mathf.Clamp01(elapsed / duration);
-
-            // Smooth cubic easing
-            t = t * t * (3f - 2f * t);
-
-            rb.MovePosition(startPos + difference * t);
-            rb.linearVelocity = Vector2.zero;
-
-            yield return new WaitForFixedUpdate();
-        }
-
-        // Final position
-        rb.position = targetPos;
-        rb.linearVelocity = Vector2.zero;
-        smoothedMovement = Vector2.zero;
-        isSnapping = false;
-        snapCoroutine = null;
-    }
-
-    private void OnValidate()
-    {
-        rb = rb != null ? rb : GetComponent<Rigidbody2D>();
-        spriteRenderer = spriteRenderer != null ? spriteRenderer : GetComponent<SpriteRenderer>();
-
-        if (rb != null)
-        {
-            rb.gravityScale = 0f;
-            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
-        }
-
-        cellsPerUnit = Mathf.Max(1f, cellsPerUnit);
-        movementSmoothing = Mathf.Clamp01(movementSmoothing);
-    }
-
-#if UNITY_EDITOR
-    private void OnDrawGizmosSelected()
-    {
-        if (!Application.isPlaying) return;
-
-        // Only draw when selected to save performance
-        Vector2 playerPos = transform.position;
-
-        // Draw minimal grid visualization
-        Gizmos.color = new Color(1f, 1f, 1f, 0.15f);
-
-        float cs = Application.isPlaying ? cellSize : (1f / cellsPerUnit);
-        int range = 3;
-
-        for (int x = -range; x <= range; x++)
-        {
-            for (int y = -range; y <= range; y++)
-            {
-                if (x == 0 && y == 0) continue;
-
-                Vector2 gridPos = new Vector2(
-                    Mathf.Round(playerPos.x / cs + x) * cs,
-                    Mathf.Round(playerPos.y / cs + y) * cs
-                );
-
-                Gizmos.DrawWireCube(gridPos, Vector3.one * cs * 0.8f);
-            }
-        }
-
-        // Show current grid position
-        if (isSnapping)
-        {
-            Gizmos.color = Color.yellow;
-            Vector2 nearest = new Vector2(
-                Mathf.Round(playerPos.x / cs) * cs,
-                Mathf.Round(playerPos.y / cs) * cs
-            );
-            Gizmos.DrawWireCube(nearest, Vector3.one * cs);
-        }
-    }
-#endif
-}*/
-
 using UnityEngine;
 using System.Collections;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(SpriteAnimator))]
 public class PlayerMover : MonoBehaviour
 {
     [Header("Movement")]
@@ -259,6 +27,7 @@ public class PlayerMover : MonoBehaviour
     // Components
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
+    private SpriteAnimator spriteAnimator;
 
     // Movement state
     private Vector2 inputVector;
@@ -281,6 +50,7 @@ public class PlayerMover : MonoBehaviour
         // Get components
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteAnimator = GetComponent<SpriteAnimator>();
 
         // Configure Rigidbody2D
         rb.gravityScale = 0f;
@@ -304,6 +74,12 @@ public class PlayerMover : MonoBehaviour
         if (!isSnapping)
         {
             ApplyMovement();
+        }
+
+        // Update animator state
+        if (spriteAnimator != null)
+        {
+            spriteAnimator.SetBool("IsMoving", currentVelocity.sqrMagnitude > MOVEMENT_EPSILON);
         }
     }
 

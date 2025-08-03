@@ -20,6 +20,6 @@ public class LayerByHeigh : MonoBehaviour
 
     private void CalculateOrder()
     {
-        sprite.sortingOrder = (int)(me.position.y * 10);
+        sprite.sortingOrder = (int)(me.position.y * -10);
     }
 }
