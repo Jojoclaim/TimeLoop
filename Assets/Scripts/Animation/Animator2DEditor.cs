@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -248,3 +249,4 @@ public class Animator2DEditor : Editor
         return ((Animator2D)target).parameters.Select(p => p.name).ToArray();
     }
 }
+#endif

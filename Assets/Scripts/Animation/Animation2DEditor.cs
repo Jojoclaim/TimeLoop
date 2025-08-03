@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -59,3 +60,4 @@ public class Animation2DEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 }
+#endif
