@@ -53,6 +53,9 @@ TagManager:
   - name: Decor
     uniqueID: 3054338649
     locked: 0
+  - name: InDoor
+    uniqueID: 1230863623
+    locked: 0
   - name: Entity
     uniqueID: 558731313
     locked: 0
