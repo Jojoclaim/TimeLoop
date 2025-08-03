@@ -24,7 +24,7 @@ MonoBehaviour:
       data:
         active: 1
         flashColor: {r: 1, g: 0, b: 0, a: 1}
-        duration: 0.1
+        duration: 0.15
     - rid: 4873931695496364610
       type: {class: CameraShakeEffect, ns: , asm: Assembly-CSharp}
       data:

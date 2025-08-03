@@ -44,5 +44,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5793e55d00d38c343b48f979ab945080, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  difficultyLevel: 0
-  maxConfusionFraction: 0.5
+  difficultyLevel: 3
+  maxConfusionFraction: 0.4
