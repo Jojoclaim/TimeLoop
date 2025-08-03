@@ -4,7 +4,7 @@ using UnityEngine.AI;
 public enum BehaviorType { Chase, Block, Flank }
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class ZombieBehavior : MonoBehaviour
+public class ZombieMover : MonoBehaviour
 {
     private NavMeshAgent agent;
     private Transform target;
@@ -13,13 +13,17 @@ public class ZombieBehavior : MonoBehaviour
     private float confusionTimer;
     private float flankAngle = 90f;
     private SpriteRenderer spriteRenderer;
+    private ZombieAttack zombieAttack;
 
     public bool IsConfused => isConfused;
+    public Transform GetCurrentTarget() => target;
+    public Vector3 Velocity => agent != null ? agent.velocity : Vector3.zero;
 
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        zombieAttack = GetComponent<ZombieAttack>();
         agent.updateRotation = false; // Optimized for 2D top-down
         agent.updateUpAxis = false;
     }
@@ -43,8 +47,18 @@ public class ZombieBehavior : MonoBehaviour
 
         HandleConfusion();
 
-        Vector3 destination = CalculateDestination();
-        agent.SetDestination(destination);
+        bool attacking = zombieAttack != null && zombieAttack.IsAttacking;
+
+        if (attacking)
+        {
+            if (!agent.isStopped) agent.isStopped = true;
+        }
+        else
+        {
+            if (agent.isStopped) agent.isStopped = false;
+            Vector3 destination = CalculateDestination();
+            agent.SetDestination(destination);
+        }
 
         // Flip based on movement direction
         float dirX = agent.velocity.x;
@@ -61,7 +75,7 @@ public class ZombieBehavior : MonoBehaviour
             float effectiveChance = config.confusionChance * DifficultyManager.Instance.GetConfusionMultiplier();
             if (Random.value < effectiveChance && ZombieSpawner.Instance.CanConfuse())
             {
-                ZombieBehavior mistaken = ZombieSpawner.Instance.GetRandomZombie(this);
+                ZombieMover mistaken = ZombieSpawner.Instance.GetRandomZombie(this);
                 if (mistaken != null)
                 {
                     target = mistaken.transform;
@@ -99,15 +113,6 @@ public class ZombieBehavior : MonoBehaviour
                 return target.position + flankDir * config.flankDistance;
             default:
                 return target.position;
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            // Implement player damage logic here
-            Debug.Log("Player caught by zombie!");
         }
     }
 }

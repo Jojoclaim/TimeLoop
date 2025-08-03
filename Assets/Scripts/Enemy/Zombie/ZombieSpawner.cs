@@ -16,8 +16,8 @@ public class ZombieSpawner : MonoBehaviour
     [SerializeField] private Transform player;
     [SerializeField] private Rigidbody2D playerRigidbody;
 
-    private Queue<ZombieBehavior> zombiePool = new Queue<ZombieBehavior>();
-    private List<ZombieBehavior> activeZombies = new List<ZombieBehavior>();
+    private Queue<ZombieMover> zombiePool = new Queue<ZombieMover>();
+    private List<ZombieMover> activeZombies = new List<ZombieMover>();
     private int confusedCount = 0;
     private Transform playerTransform;
 
@@ -59,16 +59,16 @@ public class ZombieSpawner : MonoBehaviour
         {
             GameObject obj = Instantiate(zombiePrefab);
             obj.SetActive(false);
-            ZombieBehavior zombie = obj.GetComponent<ZombieBehavior>();
+            ZombieMover zombie = obj.GetComponent<ZombieMover>();
             zombiePool.Enqueue(zombie);
         }
     }
 
-    public ZombieBehavior SpawnZombie(Vector3 position)
+    public ZombieMover SpawnZombie(Vector3 position)
     {
         if (zombiePool.Count == 0) return null; // Pool expansion can be added if needed
 
-        ZombieBehavior zombie = zombiePool.Dequeue();
+        ZombieMover zombie = zombiePool.Dequeue();
         zombie.transform.position = position;
         zombie.gameObject.SetActive(true);
 
@@ -87,7 +87,7 @@ public class ZombieSpawner : MonoBehaviour
         return zombie;
     }
 
-    public void DespawnZombie(ZombieBehavior zombie)
+    public void DespawnZombie(ZombieMover zombie)
     {
         zombie.gameObject.SetActive(false);
         activeZombies.Remove(zombie);
@@ -108,10 +108,10 @@ public class ZombieSpawner : MonoBehaviour
         confusedCount += isConfused ? 1 : -1;
     }
 
-    public ZombieBehavior GetRandomZombie(ZombieBehavior exclude)
+    public ZombieMover GetRandomZombie(ZombieMover exclude)
     {
         if (activeZombies.Count <= 1) return null;
-        ZombieBehavior target;
+        ZombieMover target;
         do
         {
             target = activeZombies[Random.Range(0, activeZombies.Count)];
@@ -123,5 +123,5 @@ public class ZombieSpawner : MonoBehaviour
 
     public Rigidbody2D GetPlayerRigidbody() => playerRigidbody;
 
-    // Example usage: ZombieSpawner.Instance.SpawnZombie(spawnPosition);
+    public List<ZombieMover> GetActiveZombies() => activeZombies;
 }
