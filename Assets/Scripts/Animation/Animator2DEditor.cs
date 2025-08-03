@@ -32,7 +32,7 @@ public class Animator2DEditor : Editor
             var conditionsProp = element.FindPropertyRelative("conditions");
             int numConditions = conditionsProp.arraySize;
             float single = EditorGUIUtility.singleLineHeight;
-            return (3 + numConditions) * single + 8 + numConditions * 2;
+            return (4 + numConditions) * single + 10 + numConditions * 2;
         };
     }
 
@@ -132,6 +132,12 @@ public class Animator2DEditor : Editor
         toIndex = EditorGUI.Popup(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
             "To", toIndex, stateNames);
         if (toIndex >= 0 && toIndex < stateNames.Length) toProp.stringValue = stateNames[toIndex];
+
+        rect.y += EditorGUIUtility.singleLineHeight + 2;
+
+        // Wait for Completion checkbox
+        EditorGUI.PropertyField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight),
+            element.FindPropertyRelative("waitForCompletion"), new GUIContent("Wait for Animation End"));
 
         rect.y += EditorGUIUtility.singleLineHeight + 4;
 

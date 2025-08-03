@@ -7,19 +7,32 @@ public class ZombieAnimation : MonoBehaviour
     private ZombieMover zombieMover;
     private ZombieAttack zombieAttack;
 
+    private Vector3 previousPosition;
+    private bool wasAttacking = false;
+
     private void Awake()
     {
         spriteAnimator = GetComponent<SpriteAnimator>();
         zombieMover = GetComponent<ZombieMover>();
         zombieAttack = GetComponent<ZombieAttack>();
+        previousPosition = transform.position;
     }
 
     private void Update()
     {
-        bool isMoving = zombieMover.Velocity.sqrMagnitude > 0.01f;
-        bool isAttacking = zombieAttack.IsAttacking;
+        // Check for movement based on transform position change
+        Vector3 currentPosition = transform.position;
+        bool isMoving = (currentPosition - previousPosition).sqrMagnitude > 0.0001f;
+        previousPosition = currentPosition;
 
-        spriteAnimator.SetBool("isMove", isMoving);
-        spriteAnimator.SetBool("isAttack", isAttacking);
+        spriteAnimator.SetBool("IsWalking", isMoving);
+
+        // Check for attack trigger
+        bool isAttacking = zombieAttack.IsAttacking;
+        if (!wasAttacking && isAttacking)
+        {
+            spriteAnimator.SetTrigger("Attack");
+        }
+        wasAttacking = isAttacking;
     }
 }

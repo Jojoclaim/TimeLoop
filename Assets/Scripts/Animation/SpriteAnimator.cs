@@ -160,9 +160,32 @@ public class SpriteAnimator : MonoBehaviour
 
     private void CheckTransitions()
     {
+        // First check for auto-transitions when OneShot animations complete
+        if (currentClip != null && currentClip.animationType == Animation2D.AnimationType.OneShot && !isClipPlaying)
+        {
+            var autoTransitions = animator?.transitions?.Where(t =>
+                t.fromState == currentStateName &&
+                (t.conditions == null || t.conditions.Count == 0)).ToList();
+
+            if (autoTransitions != null && autoTransitions.Count > 0)
+            {
+                // Take the first auto-transition found
+                var autoTrans = autoTransitions[0];
+                currentStateName = autoTrans.toState;
+                SetCurrentState();
+                return;
+            }
+        }
+
         foreach (var trans in animator?.transitions ?? Enumerable.Empty<Animator2D.Transition>())
         {
             if (trans.fromState != currentStateName) continue;
+
+            // Check if we need to wait for animation completion
+            if (trans.waitForCompletion && isClipPlaying)
+            {
+                continue; // Skip this transition until animation completes
+            }
 
             bool allConditionsMet = true;
             List<Animator2D.Parameter> triggersToConsume = new List<Animator2D.Parameter>();

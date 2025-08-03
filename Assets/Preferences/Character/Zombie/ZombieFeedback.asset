@@ -15,6 +15,7 @@ MonoBehaviour:
   effects:
   - rid: 4873931695496364619
   - rid: 4873931695496364620
+  - rid: 4873931695496364664
   references:
     version: 2
     RefIds:
@@ -22,7 +23,7 @@ MonoBehaviour:
       type: {class: ColorFlashEffect, ns: , asm: Assembly-CSharp}
       data:
         active: 1
-        flashColor: {r: 1, g: 0.5518868, b: 0.5518868, a: 1}
+        flashColor: {r: 1, g: 0.2688679, b: 0.2688679, a: 1}
         duration: 0.1
     - rid: 4873931695496364620
       type: {class: ScalePunchEffect, ns: , asm: Assembly-CSharp}
@@ -30,3 +31,11 @@ MonoBehaviour:
         active: 1
         punchAmount: 1.1
         duration: 0.15
+    - rid: 4873931695496364664
+      type: {class: CameraShakeEffect, ns: , asm: Assembly-CSharp}
+      data:
+        active: 1
+        magnitude: 1
+        roughness: 10
+        fadeIn: 0.1
+        fadeOut: 1

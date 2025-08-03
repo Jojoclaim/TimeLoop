@@ -18,8 +18,13 @@ MonoBehaviour:
     boolValue: 0
     intValue: 0
     floatValue: 0
-  - name: IsSearching
+  - name: Preparing
     type: 0
+    boolValue: 0
+    intValue: 0
+    floatValue: 0
+  - name: OnAttack
+    type: 3
     boolValue: 0
     intValue: 0
     floatValue: 0
@@ -30,8 +35,11 @@ MonoBehaviour:
   - name: Walk
     clip: {fileID: 11400000, guid: 2804191c9c0b3134e95cb197f3f841d3, type: 2}
     speed: 1
-  - name: Search
-    clip: {fileID: 11400000, guid: 2f6e99ee8ea7f424fa57702a0ff4fd32, type: 2}
+  - name: Prepare
+    clip: {fileID: 11400000, guid: af1ced96822501d49b4b80a7a3a6d288, type: 2}
+    speed: 1
+  - name: Attack
+    clip: {fileID: 11400000, guid: a10900eaa0656aa4da1918e8008080be, type: 2}
     speed: 1
   entryState: Idle
   transitions:
@@ -43,6 +51,12 @@ MonoBehaviour:
       boolValue: 1
       intValue: 0
       floatValue: 0
+    - parameterName: Preparing
+      conditionType: 0
+      boolValue: 0
+      intValue: 0
+      floatValue: 0
+    waitForCompletion: 0
   - fromState: Walk
     toState: Idle
     conditions:
@@ -51,19 +65,59 @@ MonoBehaviour:
       boolValue: 0
       intValue: 0
       floatValue: 0
-  - fromState: Walk
-    toState: Search
-    conditions:
-    - parameterName: IsSearching
+    - parameterName: Preparing
       conditionType: 0
-      boolValue: 1
+      boolValue: 0
       intValue: 0
       floatValue: 0
+    waitForCompletion: 0
   - fromState: Idle
-    toState: Search
+    toState: Prepare
     conditions:
-    - parameterName: IsSearching
+    - parameterName: Preparing
       conditionType: 0
       boolValue: 1
       intValue: 0
       floatValue: 0
+    - parameterName: IsMoving
+      conditionType: 0
+      boolValue: 0
+      intValue: 0
+      floatValue: 0
+    waitForCompletion: 0
+  - fromState: Walk
+    toState: Prepare
+    conditions:
+    - parameterName: Preparing
+      conditionType: 0
+      boolValue: 1
+      intValue: 0
+      floatValue: 0
+    waitForCompletion: 0
+  - fromState: Prepare
+    toState: Attack
+    conditions:
+    - parameterName: OnAttack
+      conditionType: 0
+      boolValue: 1
+      intValue: 0
+      floatValue: 0
+    waitForCompletion: 1
+  - fromState: Attack
+    toState: Idle
+    conditions:
+    - parameterName: IsMoving
+      conditionType: 0
+      boolValue: 0
+      intValue: 0
+      floatValue: 0
+    waitForCompletion: 1
+  - fromState: Attack
+    toState: Walk
+    conditions:
+    - parameterName: IsMoving
+      conditionType: 0
+      boolValue: 1
+      intValue: 0
+      floatValue: 0
+    waitForCompletion: 1

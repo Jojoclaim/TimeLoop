@@ -52,6 +52,9 @@ public class Animator2D : ScriptableObject
         public string fromState;
         public string toState;
         public List<Condition> conditions = new List<Condition>();
+
+        [Tooltip("If true, wait for the current animation to complete before transitioning.")]
+        public bool waitForCompletion = false;
     }
 
     [Tooltip("List of transitions between states.")]

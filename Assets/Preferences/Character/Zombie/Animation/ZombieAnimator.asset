@@ -13,8 +13,13 @@ MonoBehaviour:
   m_Name: ZombieAnimator
   m_EditorClassIdentifier: 
   parameters:
-  - name: IsMoving
+  - name: IsWalking
     type: 0
+    boolValue: 1
+    intValue: 0
+    floatValue: 0
+  - name: Attack
+    type: 3
     boolValue: 1
     intValue: 0
     floatValue: 0
@@ -25,21 +30,48 @@ MonoBehaviour:
   - name: Move
     clip: {fileID: 11400000, guid: 509aaff4586553c4d99e531618aea510, type: 2}
     speed: 1
-  entryState: Move
+  - name: Attack
+    clip: {fileID: 11400000, guid: b1d7996b27cf05c43aeebfb487bfc41c, type: 2}
+    speed: 1
+  entryState: Idle
   transitions:
   - fromState: Idle
     toState: Move
     conditions:
-    - parameterName: IsMoving
+    - parameterName: IsWalking
       conditionType: 0
       boolValue: 1
       intValue: 0
       floatValue: 0
+    waitForCompletion: 0
   - fromState: Move
     toState: Idle
     conditions:
-    - parameterName: IsMoving
+    - parameterName: IsWalking
       conditionType: 0
       boolValue: 0
       intValue: 0
       floatValue: 0
+    waitForCompletion: 0
+  - fromState: Move
+    toState: Attack
+    conditions:
+    - parameterName: Attack
+      conditionType: 0
+      boolValue: 1
+      intValue: 0
+      floatValue: 0
+    waitForCompletion: 0
+  - fromState: Idle
+    toState: Attack
+    conditions:
+    - parameterName: Attack
+      conditionType: 0
+      boolValue: 1
+      intValue: 0
+      floatValue: 0
+    waitForCompletion: 0
+  - fromState: Attack
+    toState: Move
+    conditions: []
+    waitForCompletion: 1

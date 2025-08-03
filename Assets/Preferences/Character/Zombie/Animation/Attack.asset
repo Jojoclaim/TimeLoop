@@ -13,11 +13,9 @@ MonoBehaviour:
   m_Name: Attack
   m_EditorClassIdentifier: 
   frames:
-  - sprite: {fileID: 7587017054790767666, guid: 9cb34aaac9c017d4c8ef7c402150d5f5, type: 3}
-    duration: 1.4
-  - sprite: {fileID: 8038555098996767243, guid: 9cb34aaac9c017d4c8ef7c402150d5f5, type: 3}
-    duration: 0.6
-  - sprite: {fileID: 8597317145748940133, guid: 9cb34aaac9c017d4c8ef7c402150d5f5, type: 3}
-    duration: 1.4
-  fps: 8
+  - sprite: {fileID: -5575300, guid: 9cb34aaac9c017d4c8ef7c402150d5f5, type: 3}
+    duration: 1.2
+  - sprite: {fileID: 1308943512, guid: 9cb34aaac9c017d4c8ef7c402150d5f5, type: 3}
+    duration: 0.8
+  fps: 6
   animationType: 0
