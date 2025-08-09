@@ -102,7 +102,7 @@ MonoBehaviour:
       boolValue: 1
       intValue: 0
       floatValue: 0
-    waitForCompletion: 1
+    waitForCompletion: 0
   - fromState: Attack
     toState: Idle
     conditions:
